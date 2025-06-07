@@ -1,0 +1,39 @@
+import socket
+
+HOST = "192.168.153.178"
+PORT = 8000  # Puerto del servidor8
+
+def conectar_servidor():
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((HOST, PORT))
+            print(f"Conectado a {HOST}:{PORT}")
+            
+            while True:
+                # Entrada dinámica del usuario
+                mensaje = input("Ingrese mensaje (o 'quit' para salir): ").strip()
+                
+                # Validación básica
+                if not mensaje:
+                    print("Mensaje vacío. Intente nuevamente.")
+                    continue
+                
+                # Enviar mensaje al servidor
+                s.sendall(mensaje.encode('utf-8'))
+                
+                # Recibir respuesta
+                respuesta = s.recv(1024)
+                print(f"Respuesta del servidor: {respuesta.decode('utf-8')}")
+                
+                # Salir si el comando es quit
+                if mensaje.lower() == 'quit':
+                    print("Desconectando...")
+                    break
+                    
+    except ConnectionRefusedError:
+        print("Error: No se pudo conectar al servidor")
+    except Exception as e:
+        print(f"Error del cliente: {e}")
+
+if _name_ == "_main_":
+    conectar_servidor()
