@@ -1,0 +1,52 @@
+import socket
+
+HOST = "192.168.153.178" 
+PORT = 8000  # Puerto del servidor
+
+def iniciar_servidor():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind((HOST, PORT))
+        s.listen(5)
+        print(f"Servidor escuchando en {HOST}:{PORT}")
+
+        while True:
+            print("Esperando conexión...")
+            conn, addr = s.accept()
+            
+            with conn:
+                print(f"Conexión aceptada desde {addr}")
+                
+                while True:
+                    try:
+                        # Buffer aumentado para consistencia
+                        datos = conn.recv(1024)
+                        
+                        if not datos:
+                            print("Cliente desconectado")
+                            break
+                        
+                        mensaje = datos.decode('utf-8').strip()
+                        print(f"Recibido del cliente: {mensaje}")
+                        
+                        # Comando para cerrar conexión
+                        if mensaje.lower() == 'quit':
+                            respuesta = "Conexión cerrada por el servidor"
+                            conn.sendall(respuesta.encode('utf-8'))
+                            print("Cerrando conexión por comando QUIT")
+                            break
+                        
+                        # Respuesta estándar
+                        respuesta = f"Servidor recibió: {mensaje}"
+                        conn.sendall(respuesta.encode('utf-8'))
+                        
+                    except Exception as e:
+                        print(f"Error procesando mensaje: {e}")
+                        break
+
+if _name_ == "_main_":
+    try:
+        iniciar_servidor()
+    except KeyboardInterrupt:
+        print("\nServidor cerrado por el usuario")
+    except Exception as e:
+        print(f"Error del servidor: {e}")
